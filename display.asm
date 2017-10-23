@@ -1,6 +1,7 @@
 processor 16f877
 include<p16f877.inc>
 ;Programa Display
+;first change
 counter equ h'20'
 ;filereg1 equ h'21'
 ;filereg2 equ h'22'
