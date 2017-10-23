@@ -1,3 +1,6 @@
+
+
+
 processor 16f877
 include<p16f877.inc>
 ;Programa Display
