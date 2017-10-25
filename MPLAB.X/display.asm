@@ -1,37 +1,45 @@
 processor 16F877
-   include <P16F877.INC>
+include <P16F877.INC>
 
-    ;Variables para DELAY
-val1 equ 0x30
-val2 equ 0x31     
+    val1 equ 0x30
+    val2 equ 0x31     
 
-    org 0              ;Vector de RESET
+    org 0
     goto INICIO         
-    org 5              ;Inicio del Programa
-      
-    ;Configuración de puertos
+    org 5
     
 INICIO:
-    clrf PORTB         ;Limpia PORTB   
-    clrf PORTD         ;Limpia PORTD
-    bsf STATUS, RP0    ;...
-    bcf STATUS, RP1    ;Selecciona el banco 1
-    clrf TRISB         ;Configura PORTB como salida
-    clrf TRISD         ;Configura PORTD como salida
-    bcf STATUS,RP0     ;Regresa al banco 0
+    clrf PORTB
+    clrf PORTD
+    bsf STATUS, RP0
+    bcf STATUS, RP1
+    clrf TRISB
+    clrf TRISD
+    bcf STATUS, RP0
 
-START_LCD:     
-    call INICIA_LCD    ;Configura el LCD
-    call M1            ;Muestra Mensaje
-    call LINEA2        ;Configura linea 2
-    call M2            ;Muestra Mensaje
-    goto START_LCD
+LOOP:     
+    call INICIA_LCD
+    call M1
+    call LINEA2
+    call M2
+    goto LOOP
+    
+    
+    
+;   _____ _    _ ____  _____  _    _ _______ _____ _   _           _____ 
+;  / ____| |  | |  _ \|  __ \| |  | |__   __|_   _| \ | |   /\    / ____|
+; | (___ | |  | | |_) | |__) | |  | |  | |    | | |  \| |  /  \  | (___  
+;  \___ \| |  | |  _ <|  _  /| |  | |  | |    | | | . ` | / /\ \  \___ \ 
+;  ____) | |__| | |_) | | \ \| |__| |  | |   _| |_| |\  |/ ____ \ ____) |
+; |_____/ \____/|____/|_|  \_\\____/   |_|  |_____|_| \_/_/    \_\_____/
+
+
 
     ;Mensaje a enviar
 M1:
-    movlw 'H'          ;Mueve 'H' a W
-    movwf PORTB        ;Mueve lo que hay en W a PORTB
-    call ENVIA         ;Imprime en LCD
+    movlw 'H'
+    movwf PORTB
+    call ENVIA
     movlw 'e'
     movwf PORTB
     call ENVIA
@@ -67,9 +75,9 @@ M1:
     call ENVIA
     return      
 M2:
-    movlw 'I'         ;Mueve 'I' a W
-    movwf PORTB       ;Mueve lo que hay en W a PORTB
-    call ENVIA        ;Imprime en LCD
+    movlw 'I'
+    movwf PORTB
+    call ENVIA
     movlw 'm'
     movwf PORTB
     call ENVIA
@@ -105,42 +113,49 @@ M2:
     call ENVIA
     return     
    
-    ;Subrutina para inicializar el lcd
+;===============Subrutina para inicializar el lcd
 INICIA_LCD:
-    bcf PORTD,0      ; RS=0 MODO INSTRUCCION
-    movlw 0x01       ; El comando 0x01 limpia la pantalla en el LCD
-    movwf PORTB
-    call COMANDO     ; Se da de alta el comando
-    movlw 0x0C       ; Selecciona la primera línea
-    movwf PORTB
-    call COMANDO     ; Se da de alta el comando
-    movlw 0x3C       ; Se configura el cursor
-    movwf PORTB
-    call COMANDO     ; Se da de alta el comando
-    bsf PORTD, 0     ; Rs=1 MODO DATO
+    bcf PORTD,0      ; RS = 0; MODO INSTRUCCION
+    movlw 0x01
+    movwf PORTB      ; PORTB = 00000001 ; clear
+    call COMANDO
+    
+    ;------------------Selecciona la primera línea
+    movlw 0x0C
+    movwf PORTB      ; PORTB = 00001100
+    call COMANDO
+    
+    ;------------------Se configura el cursor
+    movlw 0x3C
+    movwf PORTB      ; PORTB = 00111100
+    call COMANDO
+    
+    bsf PORTD, 0     ; Rs = 1; MODO DATO
     return
 
-    ;Subrutina para enviar comandos
+;===================Subrutina para enviar comandos
 COMANDO:
-    bsf PORTD,1     ; Pone ENABLE en 1
-    call DELAY      ; Tiempo de espera
+    bsf PORTD, 1    ; E = 1
     call DELAY
-    bcf PORTD, 1    ; ENABLE=0   
+    call DELAY
+    bcf PORTD, 1    ; E = 0
     call DELAY
     return     
 
-    ;Subrutina para enviar un dato
+;====================Subrutina para enviar un dato
 ENVIA:
-    bsf PORTD,0     ; RS=1 MODO DATO
-    call COMANDO    ; Se da de alta el comando
+    bsf PORTD,0     ; RS = 1 ; MODO DATO
+    call COMANDO
     return
 
     ;Configuración Líneal 2 LCD
 LINEA2:
-    bcf PORTD, 0    ; RS=0 MODO INSTRUCCION
-    movlw 0xc0      ; Selecciona línea 2 en el LCD
-    movwf PORTB
-    call COMANDO    ; Se da de alta el comando
+    bcf PORTD, 0    ; RS = 0 ; MODO INSTRUCCION
+    
+    ;------------------Selecciona línea 2 en el LCD
+    movlw 0xc0
+    movwf PORTB     ; PORTB = 11000000
+    call COMANDO
     return
 
     ; Subrutina de retardo
